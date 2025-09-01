@@ -1,0 +1,24 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+ContainerDb(DeviceDatabase, "Device Database", "PostgreSQL", "Реестр устройств, конфигурации и телеметрия")
+System_Ext(AllDevices, "Все устройства", "Абстрактные датчики умного дома")
+
+Container_Boundary(DeviceService, "Device Service") {
+    Component(DeviceAPI, "Device API", "gRPC Server", "Единый API для всех операций с устройствами")
+    Component(DeviceManager, "Device Manager", "Go Service", "Регистрация устройств и управление ими")
+    Component(Telemetry, "Telemetry", "Go Service", "Обработка телеметрии устройств и мониторинг системы")
+    Component(ScenarioEngine, "Scenario Engine", "Go Service", "Автоматизация сценариев работы с устройствами")
+}
+
+Rel_Down(DeviceAPI, DeviceManager, "", "Управление устройствами")
+Rel_Up(ScenarioEngine, DeviceManager, "Internal API", "Выполнение команд")
+Rel_Down(DeviceAPI, Telemetry, "", "Запросы телеметрии")
+Rel_Down(DeviceAPI, ScenarioEngine, "", "Управление сценариями")
+Rel(DeviceManager, AllDevices, "MQTT", "Команды устройствам")
+Rel_Down(DeviceManager, DeviceDatabase, "SQL", "Реестр устройств")
+Rel_Left(AllDevices, Telemetry, "MQTT", "Телеметрические данные")
+Rel_Down(Telemetry, DeviceDatabase, "SQL", "Сохранение телеметрии")
+Rel_Down(ScenarioEngine, DeviceDatabase, "SQL", "Сценарии и правила")
+
+@enduml

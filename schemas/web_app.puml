@@ -1,0 +1,30 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Component(APIGateway, "API Gateway", "Единая точка входа к микросервисам")
+Person(Customer, "Пользователь", "")
+Container_Boundary(WebApp, "Web-приложение") {
+    Component(LandingPage, "Главная страница", "React, TypeScript", "Лендинг с информацией о продукте")
+    Component(AuthComponent, "Компонент авторизации", "React, TypeScript", "Логин, регистрация, восстановление пароля")
+
+    Component(Dashboard, "Дашборд", "React, TypeScript", "Панель с обзором приложения")
+    Component(DeviceManagement, "Управление устройствами", "React, TypeScript", "CRUD операции с датчиками и создание сценариев автоматизации")
+    Component(TelemetryViewer, "Просмотр телеметрии", "React, Chart.js", "Графики и данные с датчиков")
+
+    Component(Router, "Маршрутизация", "React Router", "Навигация между страницами")
+}
+
+Rel_Down(LandingPage, AuthComponent, "Регистрация")
+Rel_Down(AuthComponent, APIGateway, "Аутентификация")
+Rel_Up(AuthComponent, Dashboard, "Успешный вход")
+
+Rel_Down(Router, Dashboard, "/dashboard")
+Rel_Down(Router, DeviceManagement, "/devices")
+Rel_Down(Router, TelemetryViewer, "/telemetry")
+
+Rel_Down(Dashboard, APIGateway, "")
+Rel_Down(Customer, Router, "")
+Rel_Down(DeviceManagement, APIGateway, "")
+Rel_Down(TelemetryViewer, APIGateway, "")
+
+@enduml

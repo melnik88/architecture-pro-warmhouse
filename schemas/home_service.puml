@@ -1,0 +1,30 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Home Service Architecture
+
+' External Services
+Container(APIGateway, "API Gateway", "Единая точка входа")
+
+' Database
+ContainerDb(HomeDatabase, "Home Database", "PostgreSQL", "Реестр домов, конфигурации, зоны и настройки")
+
+' Home Service Container
+Container_Boundary(HomeService, "Home Service") {
+    Component(HomeAPI, "Home API", "gRPC Server", "Единый API для всех операций с домами")
+
+    ' Core Components
+    Component(HomeManager, "Home Manager", "Go Service", "Регистрация и управление домами")
+}
+
+' API Relations
+Rel_Down(HomeAPI, HomeManager, "", "CRUD операции с домами")
+
+
+' Database Relations
+Rel_Down(HomeManager, HomeDatabase, "SQL", "Реестр домов")
+
+' External Service Relations
+Rel(APIGateway, HomeAPI, "gRPC", "Внешние запросы к домам")
+
+@enduml
