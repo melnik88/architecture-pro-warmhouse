@@ -19,7 +19,7 @@ entity "Home" as home {
   * home_id : UUID <<PK>>
   --
   * owner_id : UUID <<FK>>
-  * home_name : VARCHAR(255)
+  home_name : VARCHAR(255)
   address : TEXT
   created_at : TIMESTAMP
 }
@@ -28,9 +28,9 @@ entity "Device" as device {
   * device_id : UUID <<PK>>
   --
   * home_id : UUID <<FK>>
-  * device_name : VARCHAR(255)
-  * device_type : VARCHAR(100)
-  status : VARCHAR(50)
+  device_name : VARCHAR(255)
+  device_type : VARCHAR(100)
+  is_active : BOOLEAN
   configuration : JSONB
   created_at : TIMESTAMP
 }
@@ -40,14 +40,13 @@ entity "Telemetry" as telemetry {
   --
   * device_id : UUID <<FK>>
   telemetry_data : JSONB
-  * timestamp : TIMESTAMP
 }
 
 entity "Scenario" as scenario {
   * scenario_id : UUID <<PK>>
   --
   * home_id : UUID <<FK>>
-  * scenario_title : VARCHAR(255)
+  scenario_title : VARCHAR(255)
   actions : JSONB
   is_active : BOOLEAN
   created_at : TIMESTAMP
@@ -68,7 +67,7 @@ user ||--o{ home : "владеет"
 home ||--o{ device : "содержит"
 home ||--o{ scenario : "включает"
 
-device ||--o{ telemetry : "генерирует"
+device ||--|| telemetry : "генерирует"
 device ||--o{ device_scenario : "участвует в"
 scenario ||--o{ device_scenario : "включает"
 

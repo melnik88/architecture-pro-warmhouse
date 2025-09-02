@@ -1,7 +1,7 @@
 @startuml
 !includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 
-System_Ext(APIGateway, "API Gateway", "Единая точка входа")
+System(APIGateway, "API Gateway", "Единая точка входа")
 
 ContainerDb(UserDB, "User Database", "PostgreSQL", "Данные пользователей")
 ContainerDb(SessionCache, "Session Cache", "Redis", "Активные сессии и токены")
@@ -9,10 +9,10 @@ ContainerDb(SessionCache, "Session Cache", "Redis", "Активные сесси
 Container_Boundary(AuthService, "Auth Service") {
     Component(AuthAPI, "Auth API", "REST/gRPC", "Публичный API для аутентификации")
 
-    Component(UserManager, "User Manager", "Go Service", "Управление пользователями")
+    Component(UserManager, "User Manager", "Go", "Управление пользователями")
 
     Component(TokenManager, "Token Manager", "JWT", "Создание и валидация JWT токенов")
-    Component(SessionManager, "Session Manager", "Go Service", "Управление пользовательскими сессиями")
+    Component(SessionManager, "Session Manager", "Go", "Управление пользовательскими сессиями")
 }
 
 Rel_Down(APIGateway, AuthAPI, "Auth запросы")

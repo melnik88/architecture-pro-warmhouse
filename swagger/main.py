@@ -9,7 +9,7 @@ import uuid
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Теплый дом API",
+    title="Теперь умный дом API",
     description="REST API для платформы Теперь умный дом",
     version="1.0.0",
     docs_url="/docs",
