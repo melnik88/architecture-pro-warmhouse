@@ -127,6 +127,35 @@ class DeviceListResponse(BaseModel):
     data: List[Device]
     pagination: PaginationInfo
 
+# Device Manager style response models
+class DeviceManagerSingleResponse(BaseModel):
+    success: bool = True
+    data: Device
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+class DeviceManagerListResponse(BaseModel):
+    success: bool = True
+    data: List[Device]
+    count: int
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+class DeviceManagerCreateResponse(BaseModel):
+    success: bool = True
+    data: Device
+    message: str = "Device created successfully"
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+class DeviceManagerUpdateResponse(BaseModel):
+    success: bool = True
+    data: Device
+    message: str = "Device updated successfully"
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+class DeviceManagerDeleteResponse(BaseModel):
+    success: bool = True
+    message: str = "Device deleted successfully"
+    timestamp: datetime = Field(default_factory=datetime.now)
+
 # Telemetry Models
 class Telemetry(BaseModel):
     telemetry_id: str = Field(..., example=str(uuid.uuid4()))
@@ -593,8 +622,44 @@ async def delete_home(
     return MessageResponse(message="Home deleted successfully")
 
 # Device Endpoints
+@app.get("/devices",
+         response_model=DeviceManagerListResponse,
+         summary="Получение списка всех устройств",
+         description="Получение всех устройств пользователя",
+         tags=["🔌 Устройства"])
+async def get_all_devices(
+    current_user: User = Depends(get_current_user)
+):
+    """Получение списка всех устройств"""
+    # Mock data - в реальном приложении здесь будет запрос к базе данных
+    mock_devices = [
+        Device(
+            device_id=str(uuid.uuid4()),
+            home_id=str(uuid.uuid4()),
+            device_name="Датчик температуры гостиной",
+            device_type=DeviceType.temperature,
+            status=DeviceStatus.online,
+            configuration={"min_temp": 18, "max_temp": 25},
+            created_at=datetime.now()
+        ),
+        Device(
+            device_id=str(uuid.uuid4()),
+            home_id=str(uuid.uuid4()),
+            device_name="Датчик влажности спальни",
+            device_type=DeviceType.humidity,
+            status=DeviceStatus.online,
+            configuration={"min_humidity": 40, "max_humidity": 60},
+            created_at=datetime.now()
+        )
+    ]
+
+    return DeviceManagerListResponse(
+        data=mock_devices,
+        count=len(mock_devices)
+    )
+
 @app.post("/devices",
-          response_model=Device,
+          response_model=DeviceManagerCreateResponse,
           status_code=status.HTTP_201_CREATED,
           summary="Создание устройства",
           description="Создание нового устройства с привязкой к дому",
@@ -604,7 +669,7 @@ async def create_device(
     current_user: User = Depends(get_current_user)
 ):
     """Создание нового устройства с привязкой к указанному дому"""
-    return Device(
+    device = Device(
         device_id=str(uuid.uuid4()),
         home_id=device_data.home_id,
         device_name=device_data.device_name,
@@ -614,8 +679,10 @@ async def create_device(
         created_at=datetime.now()
     )
 
+    return DeviceManagerCreateResponse(data=device)
+
 @app.get("/devices/{device_id}",
-         response_model=Device,
+         response_model=DeviceManagerSingleResponse,
          summary="Получение информации об устройстве",
          description="Получение детальной информации об устройстве",
          tags=["🔌 Устройства"])
@@ -624,7 +691,7 @@ async def get_device(
     current_user: User = Depends(get_current_user)
 ):
     """Получение информации об устройстве"""
-    return Device(
+    device = Device(
         device_id=device_id,
         home_id=str(uuid.uuid4()),
         device_name="Датчик температуры гостиной",
@@ -634,8 +701,10 @@ async def get_device(
         created_at=datetime.now()
     )
 
+    return DeviceManagerSingleResponse(data=device)
+
 @app.put("/devices/{device_id}",
-         response_model=Device,
+         response_model=DeviceManagerUpdateResponse,
          summary="Обновление устройства",
          description="Изменение настроек и параметров устройства",
          tags=["🔌 Устройства"])
@@ -645,7 +714,7 @@ async def update_device(
     current_user: User = Depends(get_current_user)
 ):
     """Обновление устройства"""
-    return Device(
+    device = Device(
         device_id=device_id,
         home_id=str(uuid.uuid4()),
         device_name=device_update.device_name or "Датчик температуры гостиной",
@@ -655,8 +724,10 @@ async def update_device(
         created_at=datetime.now()
     )
 
+    return DeviceManagerUpdateResponse(data=device)
+
 @app.delete("/devices/{device_id}",
-           response_model=MessageResponse,
+           response_model=DeviceManagerDeleteResponse,
            summary="Удаление устройства",
            description="Удаление устройства из системы",
            tags=["🔌 Устройства"])
@@ -665,51 +736,9 @@ async def delete_device(
     current_user: User = Depends(get_current_user)
 ):
     """Удаление устройства"""
-    return MessageResponse(message="Device deleted successfully")
+    return DeviceManagerDeleteResponse()
 
 # Telemetry Endpoints
-@app.get("/telemetry/{device_id}",
-         response_model=TelemetryListResponse,
-         summary="Получение телеметрии устройства",
-         description="Получение телеметрических данных устройства за период",
-         tags=["📊 Телеметрия"])
-async def get_device_telemetry(
-    device_id: str,
-    start_date: Optional[datetime] = Query(None, description="Начальная дата (ISO 8601)"),
-    end_date: Optional[datetime] = Query(None, description="Конечная дата (ISO 8601)"),
-    page: int = Query(1, ge=1),
-    limit: int = Query(100, ge=1, le=1000),
-    current_user: User = Depends(get_current_user)
-):
-    """Получение телеметрических данных устройства"""
-    mock_telemetry = [
-        Telemetry(
-            telemetry_id=str(uuid.uuid4()),
-            device_id=device_id,
-            telemetry_data=[
-                {
-                    "metric": "temperature",
-                    "value": 23.5,
-                    "unit": "°C",
-                    "sensor_id": "temp_001"
-                },
-                {
-                    "metric": "humidity",
-                    "value": 45.2,
-                    "unit": "%",
-                    "sensor_id": "hum_001"
-                }
-            ],
-            timestamp=datetime.now()
-        )
-    ]
-
-    return TelemetryListResponse(
-        data=mock_telemetry,
-        pagination=PaginationInfo(page=page, limit=limit, total=1, pages=1)
-    )
-
-
 # Scenario Endpoints
 @app.post("/scenarios",
           response_model=Scenario,

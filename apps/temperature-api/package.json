@@ -13,6 +13,6 @@
   },
   "devDependencies": {},
   "keywords": ["temperature", "sensor", "api", "iot"],
-  "author": "Smart Home Team",
+  "author": "Egor Firsov",
   "license": "MIT"
 }

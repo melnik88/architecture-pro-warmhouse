@@ -142,63 +142,6 @@ Locations - название комнаты, sensorId - идентификато
 
 Ревьюер будет проверять точно так же.
 
-## **Особенность тестирования Temperature API**
-
-
-Для проверки работоспособности temperature-api были выполнены следующие тесты:
-
-#### **1. Запуск сервисов**
-```bash
-cd apps && docker-compose up -d
-```
-
-#### **2. Тестирование Health Check endpoint**
-```bash
-# Через colima (так как прямой доступ с macOS не работает)
-colima ssh -- curl http://localhost:8081/health
-```
-
-**Результат:**
-```json
-{
-  "status": "OK",
-  "service": "temperature-api",
-  "timestamp": "2025-09-06T17:58:26.072Z",
-  "uptime": 171.985429531
-}
-```
-
-#### **3. Тестирование основного API endpoint**
-```bash
-colima ssh -- curl "http://localhost:8081/temperature?location=kitchen"
-```
-
-**Результат:**
-```json
-{
-  "location": "kitchen",
-  "temperature": 21.9,
-  "unit": "°C",
-  "timestamp": "2025-09-06T17:58:48.745Z",
-  "sensor_id": "temp_sensor_kitchen",
-  "status": "active"
-}
-```
-
-#### **5. Проверка логов сервиса**
-```bash
-docker logs temperature-api
-```
-
-**Результат:**
-```
-🌡️  Temperature API server running on port 8081
-📍 Available endpoints:
-   GET /health - Health check
-   GET /temperature?location=<location> - Get temperature for location
-```
-
-
 # **Задание 6. Разработка MVP**
 
 Необходимо создать новые микросервисы и обеспечить их интеграции с существующим монолитом для плавного перехода к микросервисной архитектуре.
