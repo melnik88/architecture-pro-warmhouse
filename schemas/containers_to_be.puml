@@ -1,0 +1,30 @@
+@startuml
+!define C4Container https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!includeurl C4Container
+
+Person(Customer, "Пользователь", "")
+System_Ext(Device, "Датчик", "Физические датчики в доме")
+
+System_Boundary(System, "Теперь умный дом") {
+    Container(WebApp, "Web-приложение", "React, Node.js", "Рисует пользователям интрефейс работы с домами и датчиками")
+    Container(APIGateway, "API Gateway", "NGINX", "Обрабатывает запросы клиентских приложений")
+    Container(AuthService, "AuthService", "Go", "Управляет пользователями")
+    Container(HomeService, "HomeService", "Go", "Управляет домами")
+    Container(DeviceService, "DeviceService", "Go", "Организует работу с датчиками")
+    ContainerDb(UserDatabase, "Базы данных пользователей", "", "Хранит информацию клиентов")
+    ContainerDb(HomeDatabase, "Базы данных домов", "PostgreSQL", "Хранит информацию домов и их конфигурации")
+    ContainerDb(DeviceDatabase, "Базы данных датчиков", "PostgreSQL", "Хранит информацию датчиков и телеметрии")
+}
+
+Rel(Customer, WebApp, "Запросы про дома, датчики и статистику")
+Rel(WebApp, APIGateway, "Запросы про дома, датчики и пользователей")
+Rel(APIGateway, AuthService, "Запросы про пользователей")
+Rel(APIGateway, HomeService, "Запросы про дома")
+Rel(APIGateway, DeviceService, "Запросы про датчики")
+Rel_Down(HomeService, DeviceService, "Связывает дома с датчиками")
+Rel(DeviceService, Device, "Управляет датчиками")
+Rel(HomeService, HomeDatabase, "Сохраняет информацию домов и конфигурации")
+Rel(DeviceService, DeviceDatabase, "Сохраняет телеметрию и состояние датчиков")
+Rel(AuthService, UserDatabase, "Получает информацию о пользователях")
+
+@enduml

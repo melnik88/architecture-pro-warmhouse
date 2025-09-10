@@ -1,0 +1,1080 @@
+openapi: 3.1.0
+info:
+  title: Теперь умный дом API
+  description: REST API для платформы Теперь умный дом
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      tags:
+        - 🔐 Аутентификация
+      summary: Вход в систему
+      description: Аутентификация пользователя и получение JWT токена
+      operationId: login_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/logout:
+    post:
+      tags:
+        - 🔐 Аутентификация
+      summary: Выход из системы
+      description: Завершение пользовательской сессии
+      operationId: logout_auth_logout_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+      security:
+        - HTTPBearer: []
+  /auth/session:
+    get:
+      tags:
+        - 🔐 Аутентификация
+      summary: Информация о сессии
+      description: Получение информации о текущей пользовательской сессии
+      operationId: get_session_info_auth_session_get
+      responses:
+        '200':
+          description: Информация о сессии успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfo'
+        '401':
+          description: Сессия невалидна или истекла
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - HTTPBearer: []
+  /profile:
+    get:
+      tags:
+        - 👤 Пользователи
+      summary: Получение профиля пользователя
+      description: Получение информации о текущем пользователе
+      operationId: get_current_user_profile_profile_get
+      responses:
+        '200':
+          description: Профиль пользователя успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - HTTPBearer: []
+    put:
+      tags:
+        - 👤 Пользователи
+      summary: Обновление профиля пользователя
+      description: Обновление информации о текущем пользователе
+      operationId: update_user_profile_profile_put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+        required: true
+      responses:
+        '200':
+          description: Профиль пользователя успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - HTTPBearer: []
+  /homes:
+    get:
+      tags:
+        - 🏠 Дома
+      summary: Получение списка домов
+      description: Получение всех домов пользователя с пагинацией
+      operationId: get_homes_homes_get
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            description: Номер страницы
+            default: 1
+            title: Page
+          description: Номер страницы
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+            minimum: 1
+            description: Количество элементов на странице
+            default: 20
+            title: Limit
+          description: Количество элементов на странице
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomeListResponse'
+        '404':
+          description: Списка домов нет
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - 🏠 Дома
+      summary: Создание нового дома
+      description: Добавление нового дома для пользователя
+      operationId: create_home_homes_post
+      security:
+        - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HomeCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Home'
+  /homes/{home_id}:
+    get:
+      tags:
+        - 🏠 Дома
+      summary: Получение информации о доме
+      description: Получение детальной информации о конкретном доме
+      operationId: get_home_homes__home_id__get
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: home_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Home Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Home'
+        '404':
+          description: Дом не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - 🏠 Дома
+      summary: Обновление информации о доме
+      description: Изменение данных дома
+      operationId: update_home_homes__home_id__put
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: home_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Home Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HomeUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Home'
+    delete:
+      tags:
+        - 🏠 Дома
+      summary: Удаление дома
+      description: Удаление дома и всех связанных устройств
+      operationId: delete_home_homes__home_id__delete
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: home_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Home Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+  /devices:
+    get:
+      tags:
+        - 🔌 Устройства
+      summary: Получение списка всех устройств
+      description: Получение всех устройств пользователя
+      operationId: get_all_devices_devices_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceManagerListResponse'
+      security:
+        - HTTPBearer: []
+    post:
+      tags:
+        - 🔌 Устройства
+      summary: Создание устройства
+      description: Создание нового устройства с привязкой к дому
+      operationId: create_device_devices_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceManagerCreateResponse'
+      security:
+        - HTTPBearer: []
+  /devices/{device_id}:
+    get:
+      tags:
+        - 🔌 Устройства
+      summary: Получение информации об устройстве
+      description: Получение детальной информации об устройстве
+      operationId: get_device_devices__device_id__get
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Device Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceManagerSingleResponse'
+    put:
+      tags:
+        - 🔌 Устройства
+      summary: Обновление устройства
+      description: Изменение настроек и параметров устройства
+      operationId: update_device_devices__device_id__put
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Device Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceManagerUpdateResponse'
+    delete:
+      tags:
+        - 🔌 Устройства
+      summary: Удаление устройства
+      description: Удаление устройства из системы
+      operationId: delete_device_devices__device_id__delete
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Device Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceManagerDeleteResponse'
+  /scenarios:
+    post:
+      tags:
+        - ⚙️ Сценарии
+      summary: Создание сценария
+      description: Создание нового сценария автоматизации
+      operationId: create_scenario_scenarios_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+      security:
+        - HTTPBearer: []
+  /scenarios/{scenario_id}:
+    get:
+      tags:
+        - ⚙️ Сценарии
+      summary: Получение информации о сценарии
+      description: Получение детальной информации о сценарии
+      operationId: get_scenario_scenarios__scenario_id__get
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Scenario Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+    put:
+      tags:
+        - ⚙️ Сценарии
+      summary: Обновление сценария
+      description: Изменение параметров сценария автоматизации
+      operationId: update_scenario_scenarios__scenario_id__put
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Scenario Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+    delete:
+      tags:
+        - ⚙️ Сценарии
+      summary: Удаление сценария
+      description: Удаление сценария автоматизации
+      operationId: delete_scenario_scenarios__scenario_id__delete
+      security:
+        - HTTPBearer: []
+      parameters:
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Scenario Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+components:
+  schemas:
+    Device:
+      properties:
+        device_name:
+          type: string
+          title: Device Name
+          example: Датчик температуры гостиной
+        device_type:
+          $ref: '#/components/schemas/DeviceType'
+          example: temperature
+        configuration:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Configuration
+          default: {}
+          example:
+            max_temp: 25
+            min_temp: 18
+        device_id:
+          type: string
+          title: Device Id
+          example: b63fddb8-9017-423d-a928-80f6302b60c5
+        home_id:
+          type: string
+          title: Home Id
+          example: b0551fae-5cc2-4dc7-9b0c-f971c766b963
+        status:
+          $ref: '#/components/schemas/DeviceStatus'
+          example: online
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+        - device_name
+        - device_type
+        - device_id
+        - home_id
+        - status
+        - created_at
+      title: Device
+    DeviceCreate:
+      properties:
+        device_name:
+          type: string
+          title: Device Name
+          example: Датчик температуры гостиной
+        device_type:
+          $ref: '#/components/schemas/DeviceType'
+          example: temperature
+        configuration:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Configuration
+          default: {}
+          example:
+            max_temp: 25
+            min_temp: 18
+        home_id:
+          type: string
+          title: Home Id
+          description: ID дома для установки устройства
+          example: 75c8cc8e-9cb4-449c-b53a-822d8a51288e
+      type: object
+      required:
+        - device_name
+        - device_type
+        - home_id
+      title: DeviceCreate
+    DeviceManagerCreateResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          default: true
+        data:
+          $ref: '#/components/schemas/Device'
+        message:
+          type: string
+          title: Message
+          default: Device created successfully
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      required:
+        - data
+      title: DeviceManagerCreateResponse
+    DeviceManagerDeleteResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          default: true
+        message:
+          type: string
+          title: Message
+          default: Device deleted successfully
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      title: DeviceManagerDeleteResponse
+    DeviceManagerListResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          default: true
+        data:
+          items:
+            $ref: '#/components/schemas/Device'
+          type: array
+          title: Data
+        count:
+          type: integer
+          title: Count
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      required:
+        - data
+        - count
+      title: DeviceManagerListResponse
+    DeviceManagerSingleResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          default: true
+        data:
+          $ref: '#/components/schemas/Device'
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      required:
+        - data
+      title: DeviceManagerSingleResponse
+    DeviceManagerUpdateResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+          default: true
+        data:
+          $ref: '#/components/schemas/Device'
+        message:
+          type: string
+          title: Message
+          default: Device updated successfully
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      required:
+        - data
+      title: DeviceManagerUpdateResponse
+    DeviceStatus:
+      type: string
+      enum:
+        - online
+        - offline
+        - error
+      title: DeviceStatus
+    DeviceType:
+      type: string
+      enum:
+        - temperature
+        - humidity
+        - motion
+        - thermostat
+      title: DeviceType
+    DeviceUpdate:
+      properties:
+        device_name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Device Name
+          example: Обновленное название устройства
+        device_type:
+          anyOf:
+            - $ref: '#/components/schemas/DeviceType'
+            - type: 'null'
+        status:
+          anyOf:
+            - $ref: '#/components/schemas/DeviceStatus'
+            - type: 'null'
+        configuration:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Configuration
+      type: object
+      title: DeviceUpdate
+    ErrorResponse:
+      properties:
+        error:
+          additionalProperties: true
+          type: object
+          title: Error
+          example:
+            code: VALIDATION_ERROR
+            details: {}
+            message: Invalid input data
+      type: object
+      required:
+        - error
+      title: ErrorResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Home:
+      properties:
+        home_name:
+          type: string
+          title: Home Name
+          example: Мой дом
+        address:
+          type: string
+          title: Address
+          example: ул. Примерная, 123
+        home_id:
+          type: string
+          title: Home Id
+          example: 9473eae5-cebd-413b-bef9-cdf2d7be07ad
+        owner_id:
+          type: string
+          title: Owner Id
+          example: 9f69a652-9b59-4a3f-bc98-cdb81dfdabb9
+        devices:
+          items:
+            $ref: '#/components/schemas/Device'
+          type: array
+          title: Devices
+          description: Устройства в доме
+          default: []
+        scenarios:
+          items:
+            $ref: '#/components/schemas/Scenario'
+          type: array
+          title: Scenarios
+          description: Сценарии дома
+          default: []
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+        - home_name
+        - address
+        - home_id
+        - owner_id
+        - created_at
+      title: Home
+    HomeCreate:
+      properties:
+        home_name:
+          type: string
+          title: Home Name
+          example: Мой дом
+        address:
+          type: string
+          title: Address
+          example: ул. Примерная, 123
+      type: object
+      required:
+        - home_name
+        - address
+      title: HomeCreate
+    HomeListResponse:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Home'
+          type: array
+          title: Data
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+      type: object
+      required:
+        - data
+        - pagination
+      title: HomeListResponse
+    HomeUpdate:
+      properties:
+        home_name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Home Name
+          example: Обновленное название
+        address:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Address
+          example: ул. Новая, 456
+      type: object
+      title: HomeUpdate
+    LoginRequest:
+      properties:
+        username:
+          type: string
+          title: Username
+          example: user@example.com
+        password:
+          type: string
+          title: Password
+          example: password123
+      type: object
+      required:
+        - username
+        - password
+      title: LoginRequest
+    MessageResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+        - message
+      title: MessageResponse
+    PaginationInfo:
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          title: Page
+        limit:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Limit
+        total:
+          type: integer
+          minimum: 0
+          title: Total
+        pages:
+          type: integer
+          minimum: 0
+          title: Pages
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - pages
+      title: PaginationInfo
+    Scenario:
+      properties:
+        scenario_title:
+          type: string
+          title: Scenario Title
+          example: Утренний режим
+        actions:
+          items:
+            $ref: '#/components/schemas/ScenarioAction'
+          type: array
+          title: Actions
+          example:
+            - action: set_temperature
+              condition:
+                metric: temperature
+                operator: <
+                value: 20
+              device_id: feca86e0-23ee-46f5-bb01-724589ef1a52
+              parameters:
+                duration: 300
+                target_value: 22
+        is_active:
+          type: boolean
+          title: Is Active
+          default: true
+          example: true
+        scenario_id:
+          type: string
+          title: Scenario Id
+          example: 2782d636-f936-45c2-9bdd-259717061094
+        home_id:
+          type: string
+          title: Home Id
+          example: 4a2583a7-0c24-4a54-bf82-b81266d1f8a9
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+        - scenario_title
+        - actions
+        - scenario_id
+        - home_id
+        - created_at
+      title: Scenario
+    ScenarioAction:
+      properties:
+        action:
+          type: string
+          title: Action
+          description: Действие которое должно выполнить устройство
+          example: set_temperature
+        device_id:
+          type: string
+          title: Device Id
+          description: ID устройства которое должно выполнить действие
+          example: 16ba33d9-f6a9-48a4-b681-329c7fe2fc2e
+        condition:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Condition
+          description: Условие при котором должно выполниться действие
+          example:
+            metric: temperature
+            operator: <
+            value: 20
+        parameters:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Parameters
+          description: Параметры для выполнения действия
+          default: {}
+          example:
+            duration: 300
+            target_value: 22
+      type: object
+      required:
+        - action
+        - device_id
+      title: ScenarioAction
+    ScenarioCreate:
+      properties:
+        scenario_title:
+          type: string
+          title: Scenario Title
+          example: Утренний режим
+        actions:
+          items:
+            $ref: '#/components/schemas/ScenarioAction'
+          type: array
+          title: Actions
+          example:
+            - action: set_temperature
+              condition:
+                metric: temperature
+                operator: <
+                value: 20
+              device_id: feca86e0-23ee-46f5-bb01-724589ef1a52
+              parameters:
+                duration: 300
+                target_value: 22
+        is_active:
+          type: boolean
+          title: Is Active
+          default: true
+          example: true
+        home_id:
+          type: string
+          title: Home Id
+          description: ID дома для создания сценария
+          example: b02bff15-bb59-4626-aff2-c280b02c194a
+      type: object
+      required:
+        - scenario_title
+        - actions
+        - home_id
+      title: ScenarioCreate
+    ScenarioUpdate:
+      properties:
+        scenario_title:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Scenario Title
+          example: Обновленный сценарий
+        actions:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/ScenarioAction'
+              type: array
+            - type: 'null'
+          title: Actions
+        is_active:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Is Active
+      type: object
+      title: ScenarioUpdate
+    SessionInfo:
+      properties:
+        session_id:
+          type: string
+          title: Session Id
+          example: c592c08a-4590-4ef1-a05a-b18311edf4ea
+        user_id:
+          type: string
+          title: User Id
+          example: 12cf9d55-22be-43d9-ab63-09bf1538be7d
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        expires_at:
+          type: string
+          format: date-time
+          title: Expires At
+      type: object
+      required:
+        - session_id
+        - user_id
+        - created_at
+        - expires_at
+      title: SessionInfo
+    TokenResponse:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+          default: bearer
+        expires_in:
+          type: integer
+          title: Expires In
+          default: 3600
+      type: object
+      required:
+        - access_token
+      title: TokenResponse
+    User:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+          example: 0c44b095-05a1-42e5-8688-a8e1181cc6c0
+        username:
+          type: string
+          title: Username
+          example: user@example.com
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+        - user_id
+        - username
+        - created_at
+      title: User
+    UserUpdate:
+      properties:
+        username:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Username
+          example: newuser@example.com
+      type: object
+      title: UserUpdate
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer
