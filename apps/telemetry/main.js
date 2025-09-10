@@ -1,5 +1,5 @@
 const axios = require('axios');
-const TIMEOUT = TIMEOUT;
+const TIMEOUT = 10000;
 
 class TelemetryService {
   constructor() {

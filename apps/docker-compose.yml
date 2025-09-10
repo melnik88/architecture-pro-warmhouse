@@ -85,7 +85,7 @@ services:
     build:
       context: ./telemetry
       dockerfile: Dockerfile
-    container_name: telemetry-service
+    container_name: telemetry
     depends_on:
       device-manager:
         condition: service_started

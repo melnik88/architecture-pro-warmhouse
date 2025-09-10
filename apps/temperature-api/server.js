@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 8081;
 
 app.use(express.json());
 
-function generateRandomTemperature(location) {
+function generateRandomTemperature(location = 'living room') {
   const locationRanges = {
     'living room': { min: 18, max: 25 },
     'bedroom': { min: 16, max: 23 },
@@ -15,8 +15,8 @@ function generateRandomTemperature(location) {
     'garage': { min: 5, max: 30 }
   };
 
-  const locationKey = location ? location.toLowerCase() : 'living room';
-  const range = locationRanges[locationKey] || locationRanges['living room'];
+  const locationKey = location.toLowerCase();
+  const range = locationRanges[locationKey];
 
   const temperature = Math.random() * (range.max - range.min) + range.min;
   return parseFloat(temperature.toFixed(1));
@@ -48,6 +48,21 @@ app.get('/temperature', (req, res) => {
   res.json(response);
 });
 
+app.get('/temperature/:id', (req, res) => {
+  const sensorId = req.params.id;
+
+  // Генерируем случайную температуру для sensor ID
+  const temperature = generateRandomTemperature();
+
+  const response = {
+    value: temperature,
+    timestamp: new Date().toISOString(),
+    status: 'active',
+  };
+
+  console.log(`Temperature request for sensor ID ${sensorId}: ${temperature}°C`);
+  res.json(response);
+});
 
 app.use((err, req, res, next) => {
   console.error('Ошибка:', err.message);
@@ -71,6 +86,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📍 Available endpoints:`);
   console.log(`   GET /health - Health check`);
   console.log(`   GET /temperature?location=<location> - Get temperature for location`);
+  console.log(`   GET /temperature/:id - Get temperature for sensor ID`);
 });
 
 module.exports = app;
